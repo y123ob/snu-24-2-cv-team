@@ -71,7 +71,7 @@ def deep_learning_method(video_path):
             stair_detections.append(label)
 
             # Check if stairs are consistently detected
-            if stair_detections.count(1) >= 5:  # 5 consecutive "stair" detections
+            if stair_detections.count(1) >= 3:  # 5 consecutive "stair" detections
                 stair_detected = True
                 break
 
