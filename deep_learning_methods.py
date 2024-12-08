@@ -1,9 +1,7 @@
-import cv2  # OpenCV로 비디오 및 이미지 처리
 import os
 import torch  # PyTorch 딥러닝 프레임워크
 import torchvision.transforms as transforms  # 이미지 전처리용 transform 모듈
 from torchvision import models  # 사전 학습된 모델 로드
-from collections import deque  # 최근 감지 상태를 트래킹하기 위한 deque
 
 model = None
 transform = None
