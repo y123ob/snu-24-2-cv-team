@@ -1,38 +1,43 @@
-import argparse        # 명령줄 인자 파싱
-import os              # 파일 경로 확인 및 운영체제 기능
-import cv2             # OpenCV로 비디오 및 이미지 처리
-import torch           # PyTorch 딥러닝 프레임워크
-import torchvision.transforms as transforms  # 이미지 전처리용 transform 모듈
-from torchvision import models              # 사전 학습된 모델 로드
-from collections import deque               # 최근 감지 상태를 트래킹하기 위한 deque
+import argparse  # 명령줄 인자 파싱
+import os  # 파일 경로 확인 및 운영체제 기능
+import cv2  # OpenCV로 비디오 및 이미지 처리
+from collections import deque  # 최근 감지 상태를 트래킹하기 위한 deque
+from typing import Callable, Any  # 함수 타입 힌트용
+import deep_learning_methods
 
 
-def deep_learning_method(video_path):
+def deep_learning_method(frame):
     """Detect stairs in a video using a pre-trained deep learning model."""
-    print(f"Running deep learning method on {video_path}")
+    return deep_learning_methods.resnet_detect(frame)
 
-    # Load the pre-trained model
-    model_path = "./DeepLearning/model/resnet18_staircase.pth"
-    
-    if not os.path.exists(model_path):
-        print(f"Error: Model file {model_path} does not exist.")
-        return
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = models.resnet18()
-    model.fc = torch.nn.Linear(model.fc.in_features, 1)  # 1 class: stair (binary classification)
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.to(device)
-    model.eval()
+def traditional_method(frame):
+    """Placeholder function for traditional computer vision-based testing."""
+    # TODO: Implement the traditional computer vision inference here
 
-    # Define image transformation
-    transform = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
 
+def combined_method(frame):
+    """Run both deep learning and traditional methods for testing."""
+    # TODO: Implement the combined method here
+
+
+# Detect stairs in a video using the specified detection method
+#
+# This function processes a video file to detect the presence of stairs using a user-provided detection method.
+# The detection method should analyze the video and return a confidence score (float between 0 and 1)
+# indicating the likelihood of stairs being present in the video. Based on the confidence score,
+# this function determines if stairs are detected and returns True or False.
+#
+# Parameters:
+# - video_path (str): The file path of the video to be analyzed.
+# - detect_method (Callable[[str], float]): A function that takes the video file path as input and returns a
+#   confidence score (float between 0 and 1). The score represents the predicted probability of stairs being present
+#   in the video.
+#
+# Returns:
+# - bool:
+#   - True If stairs are detected in the video. else, False.
+def detect_stairs(video_path, detect_method: Callable[[Any], float]) -> bool:
     # Open the video file
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -43,7 +48,7 @@ def deep_learning_method(video_path):
     frame_interval = fps  # 1 second interval
     frame_count = 0
 
-    stair_detections = deque(maxlen=3)  # Track the last 5 detections
+    stair_detections = deque(maxlen=3)  # Track the last 3 detections
     stair_detected = False
 
     while cap.isOpened():
@@ -52,14 +57,8 @@ def deep_learning_method(video_path):
             break
 
         if frame_count % frame_interval == 0:  # Process every 1 second
-            # Preprocess the frame
-            input_tensor = transform(frame).unsqueeze(0).to(device)
-
-            # Inference
-            with torch.no_grad():
-                output = model(input_tensor)
-                prediction = torch.sigmoid(output).item()  # Sigmoid for binary classification
-                label = 1 if prediction > 0.5 else 0  # 0.5 as the threshold for stair detection
+            prediction = detect_method(frame)
+            label = 1 if prediction >= 0.5 else 0
 
             # Print detection result for the current frame
             if label == 1:
@@ -71,7 +70,7 @@ def deep_learning_method(video_path):
             stair_detections.append(label)
 
             # Check if stairs are consistently detected
-            if stair_detections.count(1) >= 3:  # 5 consecutive "stair" detections
+            if stair_detections.count(1) >= 3:  # 3 consecutive "stair" detections
                 stair_detected = True
                 break
 
@@ -85,18 +84,6 @@ def deep_learning_method(video_path):
     else:
         print(f"No stairs detected in the video: {video_path}")
         return False
-
-
-def traditional_method(video_path):
-    """Placeholder function for traditional computer vision-based testing."""
-    print(f"Running traditional method on {video_path}")
-    # TODO: Implement the traditional computer vision inference here
-
-
-def combined_method(video_path):
-    """Run both deep learning and traditional methods for testing."""
-    print(f"Running both methods on {video_path}")
-    # TODO: Implement the combined method here
 
 
 def main():
@@ -125,11 +112,11 @@ def main():
         return
 
     if method == "deep":
-        deep_learning_method(video_path)
+        detect_stairs(video_path, deep_learning_method)
     elif method == "traditional":
-        traditional_method(video_path)
+        detect_stairs(video_path, traditional_method)
     elif method == "both":
-        combined_method(video_path)
+        detect_stairs(video_path, combined_method)
 
 
 if __name__ == "__main__":
