@@ -4,6 +4,7 @@ import cv2  # OpenCV로 비디오 및 이미지 처리
 from collections import deque  # 최근 감지 상태를 트래킹하기 위한 deque
 from typing import Callable, Any  # 함수 타입 힌트용
 import deep_learning_methods
+import traditional_methods
 
 
 def deep_learning_method(frame):
@@ -13,7 +14,7 @@ def deep_learning_method(frame):
 
 def traditional_method(frame):
     """Placeholder function for traditional computer vision-based testing."""
-    # TODO: Implement the traditional computer vision inference here
+    return traditional_methods.trad_detect(frame)
 
 
 def combined_method(frame):

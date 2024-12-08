@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "snu-24-2-cv-team"
+version = "0.1.0"
+description = ""
+authors = ["y123ob <y123ob@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^2.2.0"
+matplotlib = "^3.9.3"
+opencv-python = "^4.10.0.84"
+torch = "^2.5.1"
+torchvision = "^0.20.1"
+scikit-learn = "^1.5.2"
+tqdm = "^4.67.1"
+pandas = "^2.2.3"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
